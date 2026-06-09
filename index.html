@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySkillzy | Calculadora de Unit Economics V10</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Satoshi:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#121212; --card:#1E1E1E; --line:#2E2E2E; --text:#FFFFFF; --muted:#8A8A8A;
+    --neon:#BBFF00; --warn:#FFB400; --bad:#FF4D4D; --blue:#8899ff; --purple:#a78bfa;
+  }
+  body { background:#0b0b0b; padding:18px; }
+  .ms-root { background:var(--bg); font-family:'Satoshi', Arial, sans-serif; color:var(--text); border-radius:14px; overflow:hidden; max-width:1180px; margin:0 auto; box-shadow:0 20px 80px rgba(0,0,0,.35); }
+  .ms-header { background:var(--card); border-bottom:1px solid var(--line); padding:1.15rem 1.35rem; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .ms-logo-z { width:30px; height:30px; flex-shrink:0; }
+  .ms-header-title { font-family:'Montserrat', sans-serif; font-weight:900; font-size:14px; letter-spacing:.12em; text-transform:uppercase; }
+  .ms-header-sub { font-size:11px; color:var(--muted); margin-left:auto; letter-spacing:.05em; }
+  .ms-body { padding:1.25rem 1.45rem 1.8rem; }
+  .ms-grid { display:grid; grid-template-columns: 1fr; gap:14px; align-items:start; max-width: 1120px; margin: 0 auto; }
+  @media (max-width: 920px) { .ms-grid { grid-template-columns:1fr; } .ms-header-sub { margin-left:0; width:100%; } }
+  .ms-section-label { font-family:'Montserrat', sans-serif; font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--neon); margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  .ms-section-label::after { content:''; flex:1; height:1px; background:var(--line); }
+  .ms-card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:1.05rem 1.15rem; margin-bottom:1rem; }
+  .ms-row { display:flex; align-items:center; gap:10px; margin-bottom:.85rem; flex-wrap:wrap; }
+  .ms-row label { font-size:12px; color:var(--muted); min-width:230px; }
+  .ms-row input[type=range] { flex:1; min-width:130px; -webkit-appearance:none; height:4px; background:var(--line); border-radius:4px; outline:none; }
+  .ms-row input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--neon); border-radius:50%; cursor:pointer; border:2px solid var(--bg); }
+  .ms-rval { font-family:'Montserrat', sans-serif; font-size:13px; font-weight:800; min-width:92px; text-align:right; }
+  .ms-divider { border:none; border-top:1px solid var(--line); margin:1rem 0; }
+  .ms-toggles { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:.9rem; }
+  .ms-tog { font-size:11px; font-family:'Montserrat', sans-serif; font-weight:800; letter-spacing:.04em; padding:7px 13px; border-radius:22px; border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer; text-transform:uppercase; transition:.15s; }
+  .ms-tog.active { background:rgba(187,255,0,.1); color:var(--neon); border-color:var(--neon); }
+  .ms-note { font-size:11px; color:var(--muted); line-height:1.45; margin-top:6px; }
+  .ms-note strong { color:var(--text); }
+  .ms-select { background:#121212; border:1px solid var(--line); color:var(--text); border-radius:8px; padding:8px 10px; font-family:'Satoshi', sans-serif; min-width:210px; }
+  .ms-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:8px; margin-bottom:1rem; }
+  .ms-met { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:.9rem .95rem; }
+  .ms-met-lbl { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; font-family:'Montserrat', sans-serif; font-weight:800; }
+  .ms-met-val { font-family:'Montserrat', sans-serif; font-size:20px; font-weight:900; color:var(--text); line-height:1.05; }
+  .ms-met-val.neon { color:var(--neon); }
+  .ms-met-val.bad { color:var(--bad); }
+  .ms-met-sub { font-size:10px; color:var(--muted); margin-top:5px; }
+  .ms-plan-badge { display:inline-block; font-size:9px; font-weight:800; font-family:'Montserrat',sans-serif; letter-spacing:.05em; padding:2px 7px; border-radius:20px; text-transform:uppercase; margin-left:4px; vertical-align:middle; }
+  .ms-table-wrap { overflow-x:auto; }
+  .ms-tbl { width:100%; border-collapse:collapse; min-width:520px; }
+  .ms-tbl th { text-align:left; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-family:'Montserrat',sans-serif; padding:8px 0; border-bottom:1px solid var(--line); }
+  .ms-tbl th:last-child, .ms-tbl td:last-child { text-align:right; }
+  .ms-tbl td { padding:7px 0; font-size:12px; color:var(--muted); border-bottom:1px solid #1a1a1a; }
+  .ms-tbl td:last-child { color:var(--text); font-weight:600; }
+  .ms-tbl .ms-neg td:last-child { color:var(--bad); }
+  .ms-tbl .ms-pos td:last-child { color:var(--neon); }
+  .ms-tbl .ms-total td { color:var(--text); font-weight:800; font-size:13px; border-top:1px solid var(--line); border-bottom:none; padding-top:10px; }
+  .ms-tbl .ms-total td:last-child { color:var(--neon); }
+  .ms-alert { font-size:11px; padding:9px 12px; border-radius:7px; margin-top:10px; line-height:1.45; border-left:2px solid; }
+  .ms-alert.ok { background:rgba(187,255,0,.08); color:var(--neon); border-color:var(--neon); }
+  .ms-alert.warn { background:rgba(255,180,0,.08); color:var(--warn); border-color:var(--warn); }
+  .ms-alert.bad { background:rgba(255,77,77,.08); color:var(--bad); border-color:var(--bad); }
+  .ms-alert.info { background:rgba(136,153,255,.08); color:var(--blue); border-color:var(--blue); }
+  .ms-switch-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .ms-switch-label { font-size:12px; color:var(--muted); flex:1; }
+  .ms-badge { font-size:10px; font-weight:800; font-family:'Montserrat',sans-serif; letter-spacing:.06em; padding:3px 8px; border-radius:20px; text-transform:uppercase; }
+  .ms-badge.on { background:rgba(187,255,0,.12); color:var(--neon); border:1px solid rgba(187,255,0,.35); }
+  .ms-badge.off { background:#121212; color:var(--muted); border:1px solid var(--line); }
+  .ms-switch { position:relative; display:inline-block; width:38px; height:22px; }
+  .ms-switch input { opacity:0; width:0; height:0; }
+  .ms-sw-slider { position:absolute; cursor:pointer; inset:0; background:var(--line); border-radius:22px; transition:.2s; }
+  .ms-sw-slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:var(--muted); border-radius:50%; transition:.2s; }
+  .ms-switch input:checked + .ms-sw-slider { background:rgba(187,255,0,.2); }
+  .ms-switch input:checked + .ms-sw-slider:before { transform:translateX(16px); background:var(--neon); }
+  .ms-bars { margin-top:8px; }
+  .ms-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:9px; font-size:11px; }
+  .ms-bar-lbl { min-width:160px; color:var(--muted); }
+  .ms-bar-track { flex:1; background:var(--line); border-radius:4px; height:14px; overflow:hidden; }
+  .ms-bar-fill { height:100%; transition:width .35s; }
+  .ms-bar-amt { min-width:86px; text-align:right; font-weight:800; font-size:11px; color:var(--text); font-family:'Montserrat', sans-serif; }
+
+  .ms-eval-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-bottom:12px; }
+  .ms-eval-card { background:#121212; border:1px solid var(--line); border-radius:10px; padding:.85rem .9rem; }
+  .ms-eval-card.hot { border-color:rgba(187,255,0,.35); background:rgba(187,255,0,.055); }
+  .ms-eval-lbl { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-family:'Montserrat',sans-serif; font-weight:800; }
+  .ms-eval-val { font-family:'Montserrat',sans-serif; font-size:20px; font-weight:900; line-height:1.05; color:var(--text); }
+  .ms-eval-val.neon { color:var(--neon); }
+  .ms-eval-val.purple { color:var(--purple); }
+  .ms-eval-val.bad { color:var(--bad); }
+  .ms-eval-desc { font-size:10px; color:var(--muted); margin-top:5px; line-height:1.35; }
+  .ms-eval-chart { margin-top:8px; }
+  .ms-eval-chart-row { display:grid; grid-template-columns:74px 1fr 108px; gap:8px; align-items:center; margin-bottom:10px; }
+  .ms-eval-scenario { font-family:'Montserrat',sans-serif; font-size:11px; font-weight:800; color:var(--text); }
+  .ms-eval-track { position:relative; height:28px; background:#121212; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .ms-eval-fill { height:100%; border-radius:999px; transition:width .35s; background:linear-gradient(90deg, rgba(167,139,250,.75), rgba(187,255,0,.95)); }
+  .ms-eval-ref { position:absolute; top:0; bottom:0; width:2px; background:#FFFFFF; opacity:.7; }
+  .ms-eval-ref::after { content:'Plano'; position:absolute; top:50%; transform:translateY(-50%); left:5px; color:#FFFFFF; font-size:9px; font-family:'Montserrat',sans-serif; opacity:.75; white-space:nowrap; }
+  .ms-eval-amt { text-align:right; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:900; color:var(--neon); }
+  .ms-eval-amt.bad { color:var(--warn); }
+  @media (max-width:640px){ .ms-eval-chart-row{ grid-template-columns:58px 1fr 86px; } .ms-eval-ref::after{ display:none; } }
+  .ms-foot { font-size:10px; color:#6E6E6E; line-height:1.5; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="ms-root">
+  <div class="ms-header">
+    <svg class="ms-logo-z" viewBox="0 0 82 73" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><linearGradient id="lg-head" x1="7.83" y1="25.02" x2="81.7" y2="25.02" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f0ff00"/><stop offset=".74" stop-color="#bbff00"/></linearGradient></defs>
+      <path fill="url(#lg-head)" d="M8.88,0h65.51c6.07,0,9.48,6.98,5.75,11.77l-29.01,37.23c-.51.66-1.3,1.04-2.13,1.04h-10.49c-.86,0-1.34-.99-.81-1.67l27.8-35.67c.54-.69.05-1.7-.83-1.7H15.59c-.93,0-1.8-.47-2.31-1.25L8,1.65C7.54.94,8.05,0,8.89,0h-.01Z"/>
+      <path fill="#f1f2f2" d="M72.81,72.73H7.3c-6.07,0-9.48-6.98-5.75-11.77L30.56,23.73c.51-.66,1.3-1.04,2.13-1.04h10.49c.86,0,1.34.99.81,1.67l-27.8,35.67c-.54.69-.05,1.7.83,1.7h49.08c.93,0,1.8.47,2.31,1.25l5.28,8.1c.46.71-.05,1.65-.89,1.65h.01Z"/>
+    </svg>
+    <span class="ms-header-title">MySkillzy</span>
+    <span class="ms-header-sub">CALCULADORA DE UNIT ECONOMICS V9</span>
+  </div>
+
+  <div class="ms-body">
+    <div class="ms-grid">
+      <div>
+        <p class="ms-section-label">Cenário base</p>
+        <div class="ms-card">
+          <div class="ms-row">
+            <label>Alunos ativos</label>
+            <input type="range" id="students" min="1" max="500" step="1" value="60">
+            <span class="ms-rval" id="students-out">60</span>
+          </div>
+          <div class="ms-row">
+            <label>Mensalidade média por aluno</label>
+            <input type="range" id="fee" min="50" max="800" step="10" value="180">
+            <span class="ms-rval" id="fee-out">R$ 180</span>
+          </div>
+          <p class="ms-note"><strong>Regra do modelo:</strong> todos os pagamentos dos alunos passam pela MySkillzy. O gateway é descontado automaticamente do recebimento do professor e aparece como despesa financeira da operação.</p>
+        </div>
+
+        <p class="ms-section-label">Forma de pagamento simulada</p>
+        <div class="ms-card">
+          <div class="ms-toggles" id="payment-method">
+            <button class="ms-tog" data-method="pix">Pix</button>
+            <button class="ms-tog active" data-method="card">Cartão nacional</button>
+            <button class="ms-tog" data-method="intl">Cartão internacional</button>
+          </div>
+          <p class="ms-note"><strong>Simulação simples:</strong> todos os alunos pagam pela forma selecionada acima. Assim fica claro quanto o gateway desconta do recebimento do professor em cada cenário.</p>
+          <p class="ms-note"><strong>Base de taxas:</strong> Pix Stripe 1,19%. Cartão nacional 3,99% + R$ 0,39 por transação. Cartão internacional 5,99% + R$ 0,39 por transação.</p>
+        </div>
+
+        <p class="ms-section-label">Taxa operacional MySkillzy</p>
+        <div class="ms-card">
+          <div class="ms-row">
+            <label>Taxa MySkillzy sobre volume processado</label>
+            <input type="range" id="platform-fee" min="0" max="2" step="0.05" value="0.50">
+            <span class="ms-rval" id="platform-fee-out">0,50%</span>
+          </div>
+          <div class="ms-toggles" id="platform-presets">
+            <button class="ms-tog" data-fee="0.25">0,25%</button>
+            <button class="ms-tog" data-fee="0.35">0,35%</button>
+            <button class="ms-tog active" data-fee="0.50">0,50%</button>
+            <button class="ms-tog" data-fee="1.00">1,00%</button>
+            <button class="ms-tog" data-fee="1.50">1,50%</button>
+            <button class="ms-tog" data-fee="2.00">2,00%</button>
+          </div>
+          <p class="ms-note">Essa taxa é receita operacional da MySkillzy e despesa do professor. Use o campo para simular de 0% a 2%. Ela existe para ajudar a cobrir automação financeira, conciliação, suporte e infraestrutura de pagamentos.</p>
+        </div>
+
+        <div class="ms-card">
+          <div class="ms-switch-row">
+            <span class="ms-switch-label">Avaliações técnicas como receita extra do professor</span>
+            <span class="ms-badge on" id="aval-badge">Ativado</span>
+            <label class="ms-switch"><input type="checkbox" id="aval-toggle" checked><span class="ms-sw-slider"></span></label>
+          </div>
+          <p class="ms-note">A avaliação técnica é um produto do professor, como avaliação física em academia. Ela aumenta o faturamento e reforça o core da MySkillzy: evolução medida por avaliação.</p>
+          <div id="aval-controls" style="opacity:1; pointer-events:auto; transition:opacity .2s;">
+            <div class="ms-row">
+              <label>Preço por avaliação</label>
+              <input type="range" id="aval-price" min="5" max="150" step="1" value="30">
+              <span class="ms-rval" id="aval-price-out">R$ 30</span>
+            </div>
+            <div class="ms-row">
+              <label>Avaliações vendidas por mês</label>
+              <input type="range" id="aval-qty" min="0" max="300" step="1" value="40">
+              <span class="ms-rval" id="aval-qty-out">40</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="ms-section-label">Impacto das avaliações na renda</p>
+        <div class="ms-card" id="evaluation-impact" style="border-color:rgba(167,139,250,.42); background:rgba(167,139,250,.045);"></div>
+      </div>
+
+      <div>
+        <p class="ms-section-label">Resultado</p>
+        <div class="ms-metrics" id="metrics"></div>
+
+        <p class="ms-section-label">Custo do gateway sobre pagamentos dos alunos</p>
+        <div class="ms-card" id="gateway-summary" style="border-color:rgba(255,77,77,.45); background:rgba(255,77,77,.045);"></div>
+
+        <p class="ms-section-label">Decomposição financeira do professor</p>
+        <div class="ms-card">
+          <div class="ms-table-wrap"><table class="ms-tbl" id="breakdown-tbl"></table></div>
+          <div id="alert-box"></div>
+        </div>
+
+
+        <p class="ms-section-label">Comparativo visual</p>
+        <div class="ms-card">
+          <div class="ms-bars" id="bar-chart"></div>
+          <p class="ms-foot">As barras ajudam a visualizar faturamento bruto, gateway, plano MySkillzy, taxa operacional e líquido estimado do professor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmt = v => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const pctFmt = v => Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+const pctFmt1 = v => Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%';
+
+const PLANS = [
+  { name:'Starter', min:1, max:20, perUnit:true, unitPrice:6.90 },
+  { name:'Growth', min:21, max:50, perUnit:true, unitPrice:5.90 },
+  { name:'Pro', min:51, max:100, perUnit:true, unitPrice:4.90 },
+  { name:'Elite 1', min:101, max:150, perUnit:false, fixedPrice:499 },
+  { name:'Elite 2', min:151, max:300, perUnit:false, fixedPrice:790 },
+  { name:'Elite Pro', min:301, max:9999, perUnit:false, fixedPrice:1190 }
+];
+const PLAN_COLORS = {'Starter':'#4e9af1','Growth':'#7c63f5','Pro':'#BBFF00','Elite 1':'#FFB400','Elite 2':'#FF7A00','Elite Pro':'#FF4D4D'};
+const RATES = {
+  pix: { label:'Pix Stripe', pct:1.19, fixed:0 },
+  card: { label:'Cartão nacional', pct:3.99, fixed:0.39 },
+  intl: { label:'Cartão internacional', pct:5.99, fixed:0.39 }
+};
+let avalActive = true;
+let paymentMethod = 'card';
+
+function getPlan(n) { return PLANS.find(p => n >= p.min && n <= p.max); }
+function getPlanPrice(plan,n) { return plan.perUnit ? plan.unitPrice * n : plan.fixedPrice; }
+function txCost(amount, txCount, method) { const r = RATES[method]; return amount * r.pct / 100 + txCount * r.fixed; }
+function txBreakdown(amount, txCount, method) { const r = RATES[method]; return { pct: amount * r.pct / 100, fixed: txCount * r.fixed, total: amount * r.pct / 100 + txCount * r.fixed }; }
+
+function calc() {
+  const n = +document.getElementById('students').value;
+  const fee = +document.getElementById('fee').value;
+  const plan = getPlan(n);
+  const planPrice = getPlanPrice(plan,n);
+  const schoolRevenue = n * fee;
+
+  const processedVolume = schoolRevenue;
+  const currentRate = RATES[paymentMethod];
+  const gatewayBreak = txBreakdown(processedVolume, n, paymentMethod);
+  const studentGatewayCost = gatewayBreak.total;
+
+  const platformFeePct = +document.getElementById('platform-fee').value;
+  const platformFeeIncome = processedVolume * platformFeePct / 100;
+
+  const avalPrice = +document.getElementById('aval-price').value;
+  const avalQty = +document.getElementById('aval-qty').value;
+  const avalGross = avalActive ? avalPrice * avalQty : 0;
+  const avalGatewayCost = avalActive ? txCost(avalGross, avalQty, paymentMethod) : 0;
+  const avalPlatformFee = avalActive ? avalGross * platformFeePct / 100 : 0;
+  const avalNet = avalGross - avalGatewayCost - avalPlatformFee;
+
+  const totalGrossProfessor = schoolRevenue + avalGross;
+  const totalGateway = studentGatewayCost + avalGatewayCost;
+  const totalPlatformFee = platformFeeIncome + avalPlatformFee;
+  const teacherNet = totalGrossProfessor - totalGateway - totalPlatformFee - planPrice;
+
+  const mySkillzyRevenue = planPrice + totalPlatformFee;
+  const pctGatewayOverRevenue = totalGateway / Math.max(1,totalGrossProfessor) * 100;
+  const pctMySkillzyOverRevenue = mySkillzyRevenue / Math.max(1,totalGrossProfessor) * 100;
+  const pctTeacherNet = teacherNet / Math.max(1,totalGrossProfessor) * 100;
+  const avalUplift = avalActive && schoolRevenue > 0 ? avalGross / schoolRevenue * 100 : 0;
+
+  document.getElementById('students-out').textContent = n;
+  document.getElementById('fee-out').textContent = 'R$ ' + fee;
+  document.getElementById('platform-fee-out').textContent = pctFmt(platformFeePct);
+  document.getElementById('aval-price-out').textContent = 'R$ ' + avalPrice;
+  document.getElementById('aval-qty-out').textContent = avalQty;
+
+  document.querySelectorAll('#platform-presets .ms-tog').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.fee - platformFeePct) < 0.001));
+
+  const pc = PLAN_COLORS[plan.name];
+  document.getElementById('metrics').innerHTML = `
+    <div class="ms-met"><p class="ms-met-lbl">Plano MySkillzy</p><p class="ms-met-val" style="color:${pc};font-size:17px;">${plan.name}<span class="ms-plan-badge" style="background:${pc}18;color:${pc};border:1px solid ${pc}44;">${plan.min}-${plan.max === 9999 ? '301+' : plan.max}</span></p><p class="ms-met-sub">${plan.perUnit ? fmt(plan.unitPrice)+'/aluno ativo' : 'valor fixo mensal'}</p></div>
+    <div class="ms-met"><p class="ms-met-lbl">Faturamento escola</p><p class="ms-met-val">${fmt(schoolRevenue)}</p><p class="ms-met-sub">${n} alunos x ${fmt(fee)}</p></div>
+    <div class="ms-met"><p class="ms-met-lbl">Gateway Stripe</p><p class="ms-met-val bad">-${fmt(studentGatewayCost)}</p><p class="ms-met-sub">despesa do professor</p></div>
+    <div class="ms-met"><p class="ms-met-lbl">Taxa operacional</p><p class="ms-met-val" style="color:#FFB400;">-${fmt(platformFeeIncome)}</p><p class="ms-met-sub">${pctFmt(platformFeePct)} sobre recebimentos</p></div>
+    <div class="ms-met"><p class="ms-met-lbl">Valor MySkillzy</p><p class="ms-met-val neon">${fmt(mySkillzyRevenue)}</p><p class="ms-met-sub">plano + taxa operacional</p></div>
+    <div class="ms-met"><p class="ms-met-lbl">Líquido professor</p><p class="ms-met-val ${teacherNet < 0 ? 'bad' : 'neon'}">${fmt(teacherNet)}</p><p class="ms-met-sub">${pctFmt1(pctTeacherNet)} do bruto total</p></div>
+    ${avalActive ? `<div class="ms-met"><p class="ms-met-lbl">Extra avaliações</p><p class="ms-met-val" style="color:#a78bfa">${fmt(avalGross)}</p><p class="ms-met-sub">+${pctFmt1(avalUplift)} no faturamento</p></div>` : ''}
+    <div class="ms-met"><p class="ms-met-lbl">Custo por aluno</p><p class="ms-met-val">${fmt((planPrice + platformFeeIncome + studentGatewayCost)/n)}</p><p class="ms-met-sub">gateway + MySkillzy</p></div>
+  `;
+
+  const fixedText = currentRate.fixed > 0 ? ` + ${fmt(currentRate.fixed)} por transação` : '';
+  document.getElementById('gateway-summary').innerHTML = `
+    <div class="ms-metrics" style="margin:0;">
+      <div class="ms-met"><p class="ms-met-lbl">Base processada</p><p class="ms-met-val">${fmt(processedVolume)}</p><p class="ms-met-sub">mensalidades pagas na plataforma</p></div>
+      <div class="ms-met"><p class="ms-met-lbl">Forma simulada</p><p class="ms-met-val">${currentRate.label}</p><p class="ms-met-sub">${pctFmt(currentRate.pct)}${fixedText}</p></div>
+      <div class="ms-met"><p class="ms-met-lbl">Taxa percentual</p><p class="ms-met-val bad">-${fmt(gatewayBreak.pct)}</p><p class="ms-met-sub">sobre o valor cheio</p></div>
+      <div class="ms-met"><p class="ms-met-lbl">Taxa fixa</p><p class="ms-met-val bad">-${fmt(gatewayBreak.fixed)}</p><p class="ms-met-sub">${n} transações</p></div>
+      <div class="ms-met"><p class="ms-met-lbl">Custo gateway</p><p class="ms-met-val bad">-${fmt(studentGatewayCost)}</p><p class="ms-met-sub">${pctFmt1(studentGatewayCost / Math.max(1, processedVolume) * 100)} do processado</p></div>
+    </div>
+    <p class="ms-note" style="margin-top:10px;color:#FFB400;">O gateway é calculado sobre o valor cheio pago pelos alunos. Essa despesa é descontada automaticamente do recebimento do professor.</p>
+  `;
+
+  let rows = `
+    <thead><tr><th>Item</th><th>Valor</th></tr></thead><tbody>
+    <tr><td>Faturamento bruto com mensalidades</td><td>${fmt(schoolRevenue)}</td></tr>
+    ${avalActive ? `<tr><td>Receita bruta com avaliações técnicas</td><td>${fmt(avalGross)}</td></tr>` : ''}
+    <tr><td>Faturamento bruto total da escola</td><td>${fmt(totalGrossProfessor)}</td></tr>
+    <tr><td colspan="2" style="padding:6px 0;"><hr style="border:none;border-top:1px solid #2E2E2E;"></td></tr>
+    <tr class="ms-neg"><td>Despesa gateway sobre mensalidades dos alunos</td><td>- ${fmt(studentGatewayCost)}</td></tr>
+    ${avalActive ? `<tr class="ms-neg"><td>Despesa gateway sobre avaliações</td><td>- ${fmt(avalGatewayCost)}</td></tr>` : ''}
+    <tr class="ms-neg"><td>Taxa operacional MySkillzy sobre mensalidades</td><td>- ${fmt(platformFeeIncome)}</td></tr>
+    ${avalActive ? `<tr class="ms-neg"><td>Taxa operacional MySkillzy sobre avaliações</td><td>- ${fmt(avalPlatformFee)}</td></tr>` : ''}
+    <tr class="ms-neg"><td>Plano MySkillzy</td><td>- ${fmt(planPrice)}</td></tr>
+    <tr class="ms-total"><td>Líquido estimado do professor</td><td>${fmt(teacherNet)}</td></tr>
+    <tr><td colspan="2" style="padding:6px 0;"><hr style="border:none;border-top:1px solid #2E2E2E;"></td></tr>
+    <tr class="ms-pos"><td>Receita MySkillzy com plano</td><td>${fmt(planPrice)}</td></tr>
+    <tr class="ms-pos"><td>Receita MySkillzy com taxa operacional</td><td>${fmt(totalPlatformFee)}</td></tr>
+    <tr class="ms-total"><td>Receita total MySkillzy</td><td>${fmt(mySkillzyRevenue)}</td></tr>
+    <tr><td>Gateway sobre bruto total</td><td>${pctFmt1(pctGatewayOverRevenue)}</td></tr>
+    <tr><td>MySkillzy sobre bruto total</td><td>${pctFmt1(pctMySkillzyOverRevenue)}</td></tr>
+    </tbody>`;
+  document.getElementById('breakdown-tbl').innerHTML = rows;
+
+  let alert = '';
+  if (pctMySkillzyOverRevenue < 5 && pctTeacherNet > 90) {
+    alert = `<div class="ms-alert ok">Cenário comercialmente defensável. O professor enxerga gateway como despesa de recebimento e a MySkillzy como custo operacional proporcional ao tamanho da escola.</div>`;
+  } else if (pctMySkillzyOverRevenue < 8) {
+    alert = `<div class="ms-alert warn">Cenário possível, mas exige boa comunicação de valor. Reforce automação financeira, avaliações e gestão operacional.</div>`;
+  } else {
+    alert = `<div class="ms-alert bad">Atenção: o impacto total da MySkillzy ficou alto. Revise plano, taxa operacional ou ancoragem comercial.</div>`;
+  }
+  document.getElementById('alert-box').innerHTML = alert;
+
+  const max = Math.max(totalGrossProfessor, schoolRevenue, teacherNet, studentGatewayCost, platformFeeIncome, planPrice, avalGross, 1);
+  const bars = [
+    {label:'Faturamento bruto total', val:totalGrossProfessor, color:'#333333'},
+    {label:'Gateway Stripe', val:totalGateway, color:'#FF4D4D'},
+    {label:'Plano MySkillzy', val:planPrice, color:pc},
+    {label:'Taxa operacional MySkillzy', val:totalPlatformFee, color:'#FFB400'},
+    ...(avalGross > 0 ? [{label:'Avaliações do professor', val:avalGross, color:'#a78bfa'}] : []),
+    {label:'Líquido professor', val:Math.max(0,teacherNet), color:'#BBFF00'},
+    {label:'Receita MySkillzy', val:mySkillzyRevenue, color:'#8899ff'}
+  ];
+  document.getElementById('bar-chart').innerHTML = bars.map(b => `
+    <div class="ms-bar-row"><span class="ms-bar-lbl">${b.label}</span><div class="ms-bar-track"><div class="ms-bar-fill" style="width:${Math.min(100, b.val/max*100).toFixed(1)}%;background:${b.color};"></div></div><span class="ms-bar-amt">${fmt(b.val)}</span></div>
+  `).join('');
+
+  const operationalCostsForTeacher = studentGatewayCost + platformFeeIncome + planPrice;
+
+  if (!avalActive) {
+    const chartMax = Math.max(operationalCostsForTeacher, studentGatewayCost, planPrice, platformFeeIncome, 1);
+    const evalBars = [
+      { label:'Gateway Stripe', val: studentGatewayCost, color:'#FF4D4D', amountClass:'bad' },
+      { label:'Taxa operacional', val: platformFeeIncome, color:'#FFB400', amountClass:'bad' },
+      { label:'Plano MySkillzy', val: planPrice, color:pc, amountClass:'bad' },
+      { label:'Total de custos', val: operationalCostsForTeacher, color:'#FFFFFF', amountClass:'bad' }
+    ];
+    document.getElementById('evaluation-impact').innerHTML = `
+      <div class="ms-eval-summary">
+        <div class="ms-eval-card"><p class="ms-eval-lbl">Custos da operação</p><p class="ms-eval-val bad">${fmt(operationalCostsForTeacher)}</p><p class="ms-eval-desc">gateway + taxa operacional + plano MySkillzy</p></div>
+        <div class="ms-eval-card"><p class="ms-eval-lbl">Avaliações vendidas</p><p class="ms-eval-val purple">Desativado</p><p class="ms-eval-desc">avaliações não entram no cálculo</p></div>
+        <div class="ms-eval-card hot"><p class="ms-eval-lbl">Saldo após custos</p><p class="ms-eval-val bad">-${fmt(operationalCostsForTeacher)}</p><p class="ms-eval-desc">sem receita extra de avaliações</p></div>
+        <div class="ms-eval-card"><p class="ms-eval-lbl">Ponto de equilíbrio</p><p class="ms-eval-val neon">0</p><p class="ms-eval-desc">ative avaliações para simular</p></div>
+      </div>
+      <div class="ms-eval-chart">
+        ${evalBars.map(b => `
+          <div class="ms-bar-row">
+            <span class="ms-bar-lbl">${b.label}</span>
+            <div class="ms-bar-track"><div class="ms-bar-fill" style="width:${Math.min(100, b.val/chartMax*100).toFixed(1)}%;background:${b.color};"></div></div>
+            <span class="ms-bar-amt" style="color:#FF4D4D">${fmt(b.val)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="ms-alert warn">Avaliações desativadas. Nenhuma receita de avaliação está sendo somada ao resultado do professor.</div>
+      <p class="ms-foot">Ative o módulo de avaliações para simular como a venda de avaliações técnicas pode compensar gateway, taxa operacional e plano MySkillzy.</p>
+    `;
+    return;
+  }
+
+  const evaluationRevenueGross = avalQty * avalPrice;
+  const evaluationGateway = txCost(evaluationRevenueGross, avalQty, paymentMethod);
+  const evaluationOpFee = evaluationRevenueGross * platformFeePct / 100;
+  const evaluationRevenueNet = evaluationRevenueGross - evaluationGateway - evaluationOpFee;
+  const evaluationBalanceGross = evaluationRevenueGross - operationalCostsForTeacher;
+  const evaluationBalanceNet = evaluationRevenueNet - operationalCostsForTeacher;
+  const breakEvenGrossEvaluations = avalPrice > 0 ? Math.ceil(operationalCostsForTeacher / avalPrice) : 0;
+  const breakEvenNetEvaluations = (avalPrice - txCost(avalPrice, 1, paymentMethod) - (avalPrice * platformFeePct / 100)) > 0
+    ? Math.ceil(operationalCostsForTeacher / (avalPrice - txCost(avalPrice, 1, paymentMethod) - (avalPrice * platformFeePct / 100)))
+    : 0;
+  const chartMax = Math.max(operationalCostsForTeacher, evaluationRevenueGross, evaluationRevenueNet, studentGatewayCost, planPrice, platformFeeIncome, 1);
+  const evalBars = [
+    { label:'Gateway Stripe', val: studentGatewayCost, color:'#FF4D4D', amountClass:'bad' },
+    { label:'Taxa operacional', val: platformFeeIncome, color:'#FFB400', amountClass:'bad' },
+    { label:'Plano MySkillzy', val: planPrice, color:pc, amountClass:'bad' },
+    { label:'Total de custos', val: operationalCostsForTeacher, color:'#FFFFFF', amountClass:'bad' },
+    { label:`Avaliações (${avalQty}×)`, val: evaluationRevenueGross, color:'#a78bfa', amountClass:'neon' }
+  ];
+  const balanceText = evaluationBalanceGross >= 0
+    ? `As avaliações cobrem os custos e ainda sobram ${fmt(evaluationBalanceGross)} no bruto.`
+    : `Ainda faltam ${fmt(Math.abs(evaluationBalanceGross))} em avaliações para cobrir os custos.`;
+  const balanceClass = evaluationBalanceGross >= 0 ? 'ok' : 'warn';
+
+  document.getElementById('evaluation-impact').innerHTML = `
+    <div class="ms-eval-summary">
+      <div class="ms-eval-card"><p class="ms-eval-lbl">Custos da operação</p><p class="ms-eval-val bad">${fmt(operationalCostsForTeacher)}</p><p class="ms-eval-desc">gateway + taxa operacional + plano MySkillzy</p></div>
+      <div class="ms-eval-card"><p class="ms-eval-lbl">Avaliações vendidas</p><p class="ms-eval-val purple">${avalQty} × ${fmt(avalPrice)}</p><p class="ms-eval-desc">receita bruta potencial: ${fmt(evaluationRevenueGross)}</p></div>
+      <div class="ms-eval-card hot"><p class="ms-eval-lbl">Saldo após custos</p><p class="ms-eval-val ${evaluationBalanceGross >= 0 ? 'neon' : 'bad'}">${fmt(evaluationBalanceGross)}</p><p class="ms-eval-desc">receita das avaliações menos custos da plataforma</p></div>
+      <div class="ms-eval-card"><p class="ms-eval-lbl">Ponto de equilíbrio</p><p class="ms-eval-val neon">${breakEvenGrossEvaluations}</p><p class="ms-eval-desc">avaliações brutas para cobrir gateway + MySkillzy</p></div>
+    </div>
+    <div class="ms-eval-chart">
+      ${evalBars.map(b => `
+        <div class="ms-bar-row">
+          <span class="ms-bar-lbl">${b.label}</span>
+          <div class="ms-bar-track"><div class="ms-bar-fill" style="width:${Math.min(100, b.val/chartMax*100).toFixed(1)}%;background:${b.color};"></div></div>
+          <span class="ms-bar-amt ${b.amountClass === 'bad' ? 'bad' : ''}" style="color:${b.amountClass === 'bad' ? '#FF4D4D' : '#BBFF00'}">${fmt(b.val)}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="ms-alert ${balanceClass}">${balanceText}</div>
+    <p class="ms-foot">Este bloco mostra para o professor que as avaliações técnicas podem compensar as despesas de gateway e o plano da MySkillzy. Para transparência, o saldo principal usa a receita bruta das avaliações. A receita líquida das avaliações após gateway e taxa operacional é ${fmt(evaluationRevenueNet)}.</p>
+  `;
+}
+
+document.getElementById('aval-toggle').addEventListener('change', function(){
+  avalActive = this.checked;
+  const ctrl = document.getElementById('aval-controls');
+  ctrl.style.opacity = avalActive ? '1' : '.35';
+  ctrl.style.pointerEvents = avalActive ? 'auto' : 'none';
+  const badge = document.getElementById('aval-badge');
+  badge.textContent = avalActive ? 'Ativado' : 'Desativado';
+  badge.className = 'ms-badge ' + (avalActive ? 'on' : 'off');
+  calc();
+});
+
+['students','fee','platform-fee','aval-price','aval-qty'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+document.querySelectorAll('#payment-method .ms-tog').forEach(btn => btn.addEventListener('click', () => {
+  paymentMethod = btn.dataset.method;
+  document.querySelectorAll('#payment-method .ms-tog').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calc();
+}));
+document.querySelectorAll('#platform-presets .ms-tog').forEach(btn => btn.addEventListener('click', () => {
+  document.getElementById('platform-fee').value = btn.dataset.fee;
+  calc();
+}));
+
+calc();
+</script>
+</body>
+</html>
